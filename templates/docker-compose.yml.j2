@@ -1,0 +1,24 @@
+version: '{{ compose_version }}'
+services:
+  {{ nginx_exporter_container_name }}:
+    image: "{{ nginx_exporter_docker_image }}"
+    container_name: "{{ nginx_exporter_container_name }}"
+    ports:
+      - "127.0.0.1:{{ nginx_exporter_host_port }}:{{ nginx_exporter_host_port }}"
+    hostname: "{{ ansible_host }}"
+    restart: always
+    {% if nginx_exporter_docker_labels is defined and nginx_exporter_docker_labels %}
+    labels:
+      {% for label in nginx_exporter_docker_labels %}
+      - "{{ label }}"
+      {% endfor %}
+    {% endif %}
+    command: "-config-file /etc/prometheus-nginxlog-exporter.yml"
+    volumes:
+      - "{{ nginx_exporter_logs_dir }}:/var/log/nginx/"
+      - "{{ nginx_exporter_config_dir }}/prometheus-nginxlog-exporter.yml:/etc/prometheus-nginxlog-exporter.yml"
+
+networks:
+  default:
+    external: true
+    name: "{{ nginx_exporter_docker_network_name }}"

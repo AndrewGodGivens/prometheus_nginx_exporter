@@ -1,24 +1,31 @@
 ---
-- name: Start docker node exporter container
+
+- name: Create project directory
+  file:
+    path: "{{ nginx_compose_project_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Generate docker-compose.yml from template
+  template:
+    src: templates/docker-compose.yml.j2
+    dest: "{{ project_dir }}/{{ nginx_exporter_container_name }}-compose.yml"
+    mode: '0644'
+
+- name: Start docker nginx exporter container
   community.docker.docker_compose:
+    project_src: "{{ project_dir }}/{{ nginx_exporter_container_name }}-compose.yml"
     state: present
-    project_name: prometheus_nginx_exporter
-    definition:
-      version: '2'
-      services:
-        nginx_exporter:
-          image: "{{ nginx_exporter_docker_image }}"
-          container_name: "{{ nginx_exporter_container_name }}"
-          ports:
-            - "127.0.0.1:{{ nginx_exporter_host_port }}:{{ nginx_exporter_host_port }}"
-          hostname: "{{ ansible_host }}"
-          restart: always
-          labels: "{{ nginx_exporter_docker_labels }}"
-          command: "-config-file /etc/prometheus-nginxlog-exporter.yml"
-          volumes:
-            - "{{ nginx_exporter_logs_dir }}:/var/log/nginx/"
-            - "{{ nginx_exporter_config_dir }}/prometheus-nginxlog-exporter.yml:/etc/prometheus-nginxlog-exporter.yml"
-      networks:
-        default:
-          external:
-            name: "{{ nginx_exporter_docker_network_name }}"
+    recreate: always
+    remove_orphans: yes
+
+- name: Verify containers are running
+  command: docker compose ps
+  register: compose_ps
+  changed_when: false
+  args:
+    chdir: "{{ project_dir }}"
+
+- name: Display container status
+  debug:
+    var: compose_ps.stdout_lines

@@ -14,6 +14,8 @@ nginx_exporter_version: v1
 nginx_exporter_arch: linux-amd64
 nginx_exporter_metrics_path: "/metrics"
 nginx_exporter_user: nginx_exporter
+compose_project_dir: /opt/compose-projects
+compose_version: 3
 histogram_buckets: [.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10]
 format: "$remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\" \"$http_x_forwarded_for\""
 namespaces:
@@ -22,4 +24,3 @@ namespaces:
     labels:
       - "app: 'server_common"
       - "environment: 'production'"
-

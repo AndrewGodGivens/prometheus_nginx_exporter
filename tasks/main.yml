@@ -20,5 +20,3 @@
 
 - name: Include docker-related tasks
   include_tasks: run_in_docker.yml
-
-
